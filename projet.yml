@@ -1,0 +1,269 @@
+openapi: 3.0.3
+info:
+  title: STD23049- TDfinal-API
+  version: '1.0.2'
+servers:
+  - url: https://localhost.std23049.com
+paths:
+  /competitions:
+    get:
+      summary: Get list of competitions
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Page number for pagination.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page.
+      responses:
+        '200':
+          description: List of competitions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Competition'
+    post:
+      summary: Create a new competition
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompetitionInput'
+      responses:
+        '201':
+          description: Competition created successfully
+
+  /teams:
+    get:
+      summary: Get list of teams
+      parameters:
+        - in: query
+          name: teamName
+          schema:
+            type: string
+          description: Filter teams by name.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Page number for pagination.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page.
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+    post:
+      summary: Create a new team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamInput'
+      responses:
+        '201':
+          description: Team created successfully
+
+  /teams/{teamId}/players:
+    get:
+      summary: Get list of players in a team
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: The ID of the team.
+        - in: query
+          name: playerName
+          schema:
+            type: string
+          description: Filter players by name.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          required: true
+          description: Page number for pagination.
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+          required: true
+          description: Number of items per page.
+      responses:
+        '200':
+          description: List of players in the team
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+    post:
+      summary: Add players to a team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerInput'
+      responses:
+        '200':
+          description: Players added to the team successfully
+
+  /teams/{teamId}/competitions:
+    post:
+      summary: Associate a team with competitions
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+          description: The ID of the team.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CompetitionAssociationInput'
+      responses:
+        '200':
+          description: Competitions associated successfully
+
+components:
+  schemas:
+    Competition:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique id of the competition.
+        name:
+          type: string
+          example: LIGA
+          description: Name of the competition.
+        location:
+          type: string
+          example: ESPAGNE
+          description: Country or continent of the competition.
+
+    CompetitionInput:
+      type: object
+      required:
+        - name
+        - location
+      properties:
+        name:
+          type: string
+          description: Name of the competition.
+        location:
+          type: string
+          description: Country or continent of the competition.
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique id of the team.
+        name:
+          type: string
+          example: Real Madrid
+          description: Name of the team.
+        slogan:
+          type: string
+          example: Hala Madrid
+          description: Slogan of the team.
+        competitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Competition'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+
+    TeamInput:
+      type: object
+      required:
+        - name
+        - slogan
+      properties:
+        name:
+          type: string
+          description: Name of the team.
+        slogan:
+          type: string
+          description: Slogan of the team.
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique id of the player.
+        name:
+          type: string
+          example: Lionel Messi
+          description: Name of the player.
+        number:
+          type: integer
+          example: 10
+          description: Jersey number of the player.
+        preferredFoot:
+          type: string
+          enum: [Left, Right]
+          description: Preferred foot of the player.
+
+    PlayerInput:
+      type: object
+      required:
+        - name
+        - number
+        - preferredFoot
+      properties:
+        name:
+          type: string
+          description: Name of the player.
+        number:
+          type: integer
+          description: Jersey number of the player.
+        preferredFoot:
+          type: string
+          enum: [Left, Right]
+          description: Preferred foot of the player.
+
+    CompetitionAssociationInput:
+      type: object
+      required:
+        - competitionId
+      properties:
+        competitionId:
+          type: string
+          description: ID of the competition to associate with the team.
